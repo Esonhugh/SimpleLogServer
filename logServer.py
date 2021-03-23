@@ -55,7 +55,9 @@ accessLogPassword=""
 # Both send to TG and you
 # GET /check?pass=accessLogPassword
 # Only send to you
+##################################################################
 
+app.run(threaded=True)
 
 def sendMe(msg,codeflag=msgCodeFlag):
     if (codeflag):
