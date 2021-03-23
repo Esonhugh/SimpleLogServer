@@ -57,7 +57,6 @@ accessLogPassword=""
 # Only send to you
 ##################################################################
 
-app.run(threaded=True)
 
 def sendMe(msg,codeflag=msgCodeFlag):
     if (codeflag):
@@ -171,5 +170,5 @@ def make_request(response):
     return response
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port=80) 
+    app.run(host='0.0.0.0',port=80,threaded=True) 
     # server should be run as root to listen the port
