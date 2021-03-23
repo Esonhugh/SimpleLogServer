@@ -61,7 +61,7 @@ def before_request():
     logger = json.dumps(log)
     flag = 1
     for bad_ua in blacklist :
-        if bad_ua in (request.headers["User-Agent"]) :
+        if bad_ua in ( request.headers.get("User-Agent") ) :
             flag = 0
     if flag == 0 :
         logger += "<bad_ua tag>"
